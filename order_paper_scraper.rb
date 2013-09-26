@@ -5,7 +5,7 @@ require 'open-uri'
 
 class OrderPaperScraper
 
-  attr_reader :url, :doc, :base_url, :calendar_links, :data
+  attr_reader :url, :doc, :base_url, :data
 
   def initialize(args)
     @base_url = args[:base_url]
@@ -17,8 +17,8 @@ class OrderPaperScraper
   def scrape
     calendar_links = collect_calendar_links
     calendar_links.each do |link|
-      questions_hash = get_questions_data(link)
-      questions_hash.each do |k,v|
+      data_hash = get_questions_data(link)
+      data_hash.each do |k,v|
         @data[k.to_sym] = v
       end
     end
@@ -28,7 +28,8 @@ class OrderPaperScraper
   def get_questions_data(link)
     questions_link = get_questions_link(link)
     questions_html = get_questions_html(questions_link)
-    question_hash = create_question_hash(questions_html) # parse this html into array format for @data
+    data_hash = create_data_hash(questions_html) # parse this html into array format for @data
+    data_hash
   end
 
   def get_questions_html(link)
@@ -53,8 +54,7 @@ class OrderPaperScraper
     calendar_links
   end
 
-  def create_question_hash(html)
-    # {:"q-2141" => {:date => "2012-03-20", :content => "oprgkprkgrp"}}
+  def create_data_hash(html)
     title_text = html.css("table.Item")[0].css('p > b')[0].text
     session_date = title_text.match(/^\w+,\s([\w\s,]+)\s\(/)[1]
     key = session_date.to_sym
@@ -62,7 +62,7 @@ class OrderPaperScraper
     title_text = title_text.gsub(title_text.match(/^\w+,\s([\w\s,]+)\s\(/)[0], "")
     session_number = title_text.match(/\d+/)[0]
 
-    @data[key] = {session_number: session_number}
+    data[key] = {session_number: session_number}
 
     questions = html.css("td.ItemPara")
     questions.each_with_index do |question, index|
@@ -84,11 +84,11 @@ class OrderPaperScraper
       text = text.gsub(paper_date, "")
       text = text.gsub(/^[\s\—]+(\w+)/, '\1')
 
-      mp_name = text.match(/^([\w\.\s\-\é\è\—\â\Î]+)[^\s\(]/)[0]
+      mp_name = text.match(/^([\w\.\s\-\é\è\—\â\Î\ê\î\É\È\Â\ô\Ô]+)[^\s\(]/)[0]
 
       text = text.gsub(mp_name, "").strip
 
-      mp_location = text.match(/^\(([\w\—\s\'\.\-\é\è\â\Î]+)\)/)[0]
+      mp_location = text.match(/^\(([\w\—\s\'\.\-\é\è\â\Î\ê\î\É\È\Â\ô\Ô]+)\)/)[0]
 
       text = text.gsub(mp_location, "")
 
@@ -96,14 +96,14 @@ class OrderPaperScraper
 
       question_text = text.gsub(/^[\s\—]+(\w+)/, '\1')
 
-      @data[key][question_number.to_sym] = {
+      data[key][question_number.to_sym] = {
         paper_date: paper_date,
         mp_name: mp_name,
         mp_location: mp_location,
         question_text: question_text
       }
     end
-    @data
+    data
   end
 end
 
