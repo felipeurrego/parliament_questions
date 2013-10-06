@@ -23,5 +23,11 @@ describe OrderPaperParser do
       parser.slice_mp_name!.should == "Mr. Nicholls"
       parser.text.should == "(Vaudreuil—Soulanges) — With regard to federal grants and contributions, what were the amounts paid out in the Vaudreuil-Soulanges riding between April 1, 2011, and October 25, 2012, broken down by (i) the identity and address of each recipient, (ii) the start date for the funding, (iii) the end date for the funding, (iv) the amount allocated, (v) the name of the program under which the funding was allocated?"
     end
+
+    it "should extract the mp location" do
+      parser.text = "(Vaudreuil—Soulanges) — With regard to federal grants and contributions, what were the amounts paid out in the Vaudreuil-Soulanges riding between April 1, 2011, and October 25, 2012, broken down by (i) the identity and address of each recipient, (ii) the start date for the funding, (iii) the end date for the funding, (iv) the amount allocated, (v) the name of the program under which the funding was allocated?"
+      parser.slice_mp_location!.should == "Vaudreuil—Soulanges"
+      parser.text.should == "With regard to federal grants and contributions, what were the amounts paid out in the Vaudreuil-Soulanges riding between April 1, 2011, and October 25, 2012, broken down by (i) the identity and address of each recipient, (ii) the start date for the funding, (iii) the end date for the funding, (iv) the amount allocated, (v) the name of the program under which the funding was allocated?"
+    end
   end
 end

@@ -38,27 +38,10 @@ class OrderPaperSession
   def parse_question(question)
     parser = OrderPaperParser.new
     parser.convert_xml_to_text!(question)
-
     question_number = parser.slice_question_number!
-    paper_date = parser.slice_paper_date!
-    mp_name = parser.slice_mp_name!
+    question_data = parser.convert_text_to_data
 
-    parser.text = parser.text.gsub(mp_name, "").strip
-
-    mp_location = parser.text.match(/^\(([\w\—\s\'\.\-\é\è\â\Î\ê\î\É\È\Â\ô\Ô]+)\)/)[0]
-
-    parser.text = parser.text.gsub(mp_location, "")
-
-    mp_location = mp_location.gsub(/[\(\)]/, "")
-
-    question_text = parser.text.gsub(/^[\s\—]+(\w+)/, '\1')
-
-    data[key][question_number.to_sym] = {
-      paper_date: paper_date,
-      mp_name: mp_name,
-      mp_location: mp_location,
-      question_text: question_text
-    }
+    data[key][question_number.to_sym] = question_data
   end
 
   private
