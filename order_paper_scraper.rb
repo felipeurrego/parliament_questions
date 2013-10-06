@@ -1,5 +1,3 @@
-require 'pry'
-require 'pry-nav'
 require 'nokogiri'
 require 'open-uri'
 require '/Users/andrew/Projects/OrderPapers/order_paper_parser.rb'
