@@ -1,6 +1,6 @@
 require 'nokogiri'
 require 'open-uri'
-require '/Users/andrew/Projects/OrderPapers/order_paper_parser.rb'
+require '/Users/andrew/Projects/OrderPapers/order_paper_session.rb'
 
 class OrderPaperScraper
 
@@ -13,22 +13,25 @@ class OrderPaperScraper
   end
 
   def scrape
-    calendar_links = collect_calendar_links
-    calendar_links.each do |link|
-      data_hash = get_questions_data(link)
-      data_hash.each do |k,v|
-        @data[k.to_sym] = v
-      end
+    collect_calendar_links.each do |link|
+      add_questions_to_data(link)
     end
     @data
+  end
+
+  def add_questions_to_data(link)
+    data_hash = get_questions_data(link)
+    data_hash.each do |k,v|
+      @data[k.to_sym] = v
+    end
   end
 
   def get_questions_data(link)
     questions_link = get_questions_link(link)
     questions_html = get_questions_html(questions_link)
-    parser = OrderPaperParser.new(questions_html)
+    order_paper_session = OrderPaperSession.new(questions_html)
 
-    data_hash = parser.create_data_hash # parse this html into array format for @data
+    data_hash = order_paper_session.create_data_hash # parse this html into array format for @data
     data_hash
   end
 
