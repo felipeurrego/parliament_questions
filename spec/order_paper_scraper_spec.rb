@@ -2,6 +2,7 @@ require 'nokogiri'
 require 'spec_helper'
 require '/Users/andrew/Projects/OrderPapers/order_paper_scraper.rb'
 
+
 describe OrderPaperScraper do
 
   let(:scraper) { OrderPaperScraper.new(url: "http://www.parl.gc.ca/housechamberbusiness/ChamberSittings.aspx?View=N&Language=E&Mode=1&Parl=41&Ses=1",
