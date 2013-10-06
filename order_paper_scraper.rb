@@ -5,12 +5,11 @@ require 'open-uri'
 
 class OrderPaperScraper
 
-  attr_reader :url, :doc, :base_url, :data
+  attr_reader :url, :base_url, :data
 
   def initialize(args)
     @base_url = args[:base_url]
     @url = args[:url]
-    @doc = Nokogiri::HTML(open(url))
     @data = {}
   end
 
@@ -33,30 +32,44 @@ class OrderPaperScraper
   end
 
   def get_questions_html(link)
-    questions_html = Nokogiri::HTML(open(link))
+    questions_html = open_html(link)
     questions_html
   end
 
   def get_questions_link(link)
-    index_page = Nokogiri::HTML(open(link))
+    index_page = open_html(link)
     questions_link = ""
-    index_page.css('a.DefaultTableOfContentsFile.Link').each do |link|
-      questions_link = (@base_url + link['href'] + '&Col=1') if link.text.include?("Questions")
+    index_page.css('a.DefaultTableOfContentsFile.Link').each do |toc_link|
+      questions_link = (@base_url + toc_link['href'] + '&Col=1') if toc_link.text.include?("Questions")
     end
     questions_link
   end
 
+  def open_html(link)
+    Nokogiri::HTML(open(link))
+  end
+
   def collect_calendar_links
+    doc = open_html(url)
+
     calendar_links = []
-    @doc.css('.PublicationCalendarLink').each do |link|
+    doc.css('.PublicationCalendarLink').each do |link|
       calendar_links << (@base_url + link["href"])
     end
     calendar_links
   end
 
+  def get_title_text(html)
+    html.css("table.Item")[0].css('p > b')[0].text
+  end
+
+  def get_session_date(title_text)
+    title_text.match(/^\w+,\s([\w\s,]+)\s\(/)[1]
+  end
+
   def create_data_hash(html)
-    title_text = html.css("table.Item")[0].css('p > b')[0].text
-    session_date = title_text.match(/^\w+,\s([\w\s,]+)\s\(/)[1]
+    title_text = get_title_text(html)
+    session_date = get_session_date(title_text)
     key = session_date.to_sym
 
     title_text = title_text.gsub(title_text.match(/^\w+,\s([\w\s,]+)\s\(/)[0], "")
@@ -66,8 +79,8 @@ class OrderPaperScraper
 
     questions = html.css("td.ItemPara")
     questions.each_with_index do |question, index|
-      puts "Index: #{index}\n"
-      puts question.text
+      # puts "Index: #{index}\n"
+      # puts question.text
 
       question.css("b sup").remove
       text = question.text
@@ -107,6 +120,7 @@ class OrderPaperScraper
   end
 end
 
-scraper = OrderPaperScraper.new(url: "http://www.parl.gc.ca/housechamberbusiness/ChamberSittings.aspx?View=N&Language=E&Mode=1&Parl=41&Ses=1",
-                                base_url: 'http://www.parl.gc.ca')
-scraper.scrape
+# scraper = OrderPaperScraper.new(url: "http://www.parl.gc.ca/housechamberbusiness/ChamberSittings.aspx?View=N&Language=E&Mode=1&Parl=41&Ses=1",
+#                                 base_url: 'http://www.parl.gc.ca')
+# scraper.scrape
+
